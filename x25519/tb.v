@@ -45,9 +45,10 @@ module testbench;
 		  .z(x3_out));
 
    inv_montgomery #(.N(255)) inv0
-   (.clk(clk), .rst(rst), .X(255'd2), .M(`P25519), .R(x3_out), .req_valid(1'b1),
-    .req_ready(req_ready), .req_busy(req_busy), .res_valid(res_valid),
-    .res_ready(res_ready));
+   (.clk(clk), .rst(rst), .X(255'd2), .M(`P25519), .R(x3_out),
+    .real_inverse(1'b1),
+    .req_valid(1'b1), .req_ready(req_ready), .req_busy(req_busy),
+    .res_valid(res_valid), .res_ready(res_ready));
 
    multmod multmod0
      (.clk(clk), .rst(rst), .X(255'd28948022309329048855892746252171976963317496166410141009864396001978282409984), .Y(255'd21330121701610878104342023554231983025602365596302209165163239159352418617876), .Z(x3_out), .req_valid(1'b1),
