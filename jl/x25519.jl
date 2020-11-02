@@ -196,13 +196,16 @@ function signbit(x)
 end
 
 function bitsize(M)
+    if (M < 0)
+        M = -M
+    end
     return length(string(M,base=2))
 end
 
 # Montgomery modular inverse.
 # Input X in 1:M-1 and M
 # Output Lrs in 1:M-1 where Lrs = Xinv 2^n mod M
-function inv_montgomery(X, M)
+function inv_montgomery(X, M; real_inverse=false)
     # Phase1
     k = -bitsize(M)
     Luv = BigInt(0)
@@ -250,6 +253,10 @@ function inv_montgomery(X, M)
     end
 
     # Phase 2
+    if (real_inverse)
+        k = k + bitsize(M)
+    end
+
     while (k != 0)
         # println("Phase2 Lrs $(Lrs) Rrs $(Rrs) k $(k)")
         k = k - 1
@@ -265,8 +272,10 @@ end
 # Modular inverse modulo 2^255-19 with Montgomery modular inverse.
 function invmod_25519_M(x)
     P = BigInt(2)^255-19
-    iM = inv_montgomery(x, P)
+    iM = inv_montgomery(x, P, real_inverse=true)
+    # iM = inv_montgomery(x, P)
     # i2n = inverse of 2^255 mod P = inverse of 19 mod P
-    i2n = 21330121701610878104342023554231983025602365596302209165163239159352418617876
-    return multmod_25519(iM, i2n)
+    # i2n = 21330121701610878104342023554231983025602365596302209165163239159352418617876
+    # return multmod_25519(iM, i2n)
+    return iM
 end
