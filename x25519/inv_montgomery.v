@@ -6,12 +6,14 @@
 
 // Input X in 1:M-1 and M
 // Output R in 1:M-1 where R = Xinv*2^n mod M
+//  if real_inverse == false, then n = bit size of M else n = 0
 module inv_montgomery #(parameter N = 255)
    (input clk,
     input rst,
     input [N-1:0] X,
     input [N-1:0] M,
     output reg [N-1:0] R,
+    input real_inverse,
     input req_valid,
     output reg req_ready,
     output reg req_busy,
@@ -21,17 +23,20 @@ module inv_montgomery #(parameter N = 255)
    // Phase1
    reg [3:0] state;
    reg [9:0] k;
-   reg [2*N-1:0] Luv, Ruv, Lrs, Rrs;
-   reg [2*N-1:0] hLuv, dLuv, hRrs, dRrs, dLrs, addLuv, subLuv, subLrs, hLrs, addLrs;
+   wire [9:0] n_ph2;
+   reg [(N+2)-1:0] Luv, Ruv, Lrs, Rrs;
+   reg [(N+2)-1:0] hLuv, dLuv, hRrs, dRrs, dLrs, addLuv, subLuv, subLrs, hLrs, addLrs;
    reg SLuv, SRuv, nSLuv, nSLrs;
+
+   assign n_ph2 = (real_inverse) ? 0 : N;
 
    always @* begin
       if (state == S_PHASE1_END) begin
 	 subLrs = Lrs - Rrs;
-	 nSLrs = subLrs[2*N-1:2*N-1];
+	 nSLrs = subLrs[(N+2)-1:(N+2)-1];
       end
       else if (state == S_LOOP2) begin
-	 hLrs = { Lrs[2*N-1:2*N-1], Lrs[2*N-1:1] };
+	 hLrs = { Lrs[(N+2)-1:(N+2)-1], Lrs[(N+2)-1:1] };
 	 addLrs = Lrs + Rrs;
       end
    end // always @ *
@@ -70,25 +75,25 @@ module inv_montgomery #(parameter N = 255)
       else if (state == S_READY) begin
 	 req_ready <= 0;
 	 state <= S_LOOP1_STEP1;
-	 Luv <= { Luv[2*N-1:2*N-1], Luv[2*N-1:1] } + Ruv;
+	 Luv <= { Luv[(N+2)-1:(N+2)-1], Luv[(N+2)-1:1] } + Ruv;
 	 Ruv <= M;
 	 Lrs <= Lrs + Rrs;
 	 Rrs <= 0;
       end
       else if (state == S_LOOP1_STEP1) begin
-	 SLuv <= Luv[2*N-1:2*N-1];
-	 SRuv <= Ruv[2*N-1:2*N-1];
-	 hLuv <= { Luv[2*N-1:2*N-1], Luv[2*N-1:1] };
-	 dLuv <= { Luv[2*N-2:0], 1'b0 };
-	 hRrs <= { Rrs[2*N-1:2*N-1], Rrs[2*N-1:1] };
-	 dRrs <= { Rrs[2*N-2:0], 1'b0 };
-	 dLrs <= { Lrs[2*N-2:0], 1'b0 };
-	 addLuv <= { Luv[2*N-1:2*N-1], Luv[2*N-1:1] } + Ruv;
-	 subLuv <= { Luv[2*N-1:2*N-1], Luv[2*N-1:1] } - Ruv;
+	 SLuv <= Luv[(N+2)-1:(N+2)-1];
+	 SRuv <= Ruv[(N+2)-1:(N+2)-1];
+	 hLuv <= { Luv[(N+2)-1:(N+2)-1], Luv[(N+2)-1:1] };
+	 dLuv <= { Luv[(N+2)-2:0], 1'b0 };
+	 hRrs <= { Rrs[(N+2)-1:(N+2)-1], Rrs[(N+2)-1:1] };
+	 dRrs <= { Rrs[(N+2)-2:0], 1'b0 };
+	 dLrs <= { Lrs[(N+2)-2:0], 1'b0 };
+	 addLuv <= { Luv[(N+2)-1:(N+2)-1], Luv[(N+2)-1:1] } + Ruv;
+	 subLuv <= { Luv[(N+2)-1:(N+2)-1], Luv[(N+2)-1:1] } - Ruv;
 	 state <= S_LOOP1_STEP2;
       end
       else if (state == S_LOOP1_STEP2) begin
-	 nSLuv = (SLuv ^ SRuv) ? addLuv[2*N-1:2*N-1] : subLuv[2*N-1:2*N-1];
+	 nSLuv = (SLuv ^ SRuv) ? addLuv[(N+2)-1:(N+2)-1] : subLuv[(N+2)-1:(N+2)-1];
 	 state <= S_LOOP1_UPDATE;
       end
       else if (state == S_LOOP1_UPDATE) begin
@@ -129,7 +134,7 @@ module inv_montgomery #(parameter N = 255)
       end
       else if (state == S_LOOP2) begin
 	 //$display("Lrs %d Rrs %d k %d", Lrs, Rrs, k);
-	 if (k == N) begin
+	 if (k == n_ph2) begin
 	    state <= S_POST;
 	    R <= Lrs;
 	    res_valid <= 1;
@@ -137,7 +142,7 @@ module inv_montgomery #(parameter N = 255)
 	 end
 	 else begin
 	    k <= k - 1;
-	    Lrs <= (Lrs[0] == 1'b0) ? hLrs : addLrs[2*N-1:1];
+	    Lrs <= (Lrs[0] == 1'b0) ? hLrs : addLrs[(N+2)-1:1];
 	 end
       end
       else if (state == S_POST) begin

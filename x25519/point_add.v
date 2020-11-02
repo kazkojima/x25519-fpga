@@ -5,7 +5,7 @@
 //  10.1007/978-3-540-89255-7_20.
 
 `define K25519 255'd16295367250680780974490674513165176452449235426866156013048779062215315747161
-`define I255 255'd21330121701610878104342023554231983025602365596302209165163239159352418617876
+//`define I255 255'd21330121701610878104342023554231983025602365596302209165163239159352418617876
 
 // Point addition on 25519 curve
 module point_add(input clk,
@@ -47,11 +47,14 @@ module point_add(input clk,
    wire inv_res_valid;
    reg inv_req_valid;
    reg inv_res_ready;
-   wire [254:0] P, k, i2n;
+   wire [254:0] P, k;
 
    assign P = `P25519;
    assign k = `K25519;
+`ifdef I255
+   wire [254:0] i2n;
    assign i2n = `I255;
+`endif
 
    addmod add0(.a(add_in_1), .b(add_in_2), .z(add_out));
    submod sub0(.a(sub_in_1), .b(sub_in_2), .z(sub_out));
@@ -64,7 +67,7 @@ module point_add(input clk,
 		.res_ready(mul_res_ready));
    inv_montgomery #(.N(255)) inv0
      (.clk(clk), .rst(rst),
-      .X(inv_in), .M(P), .R(inv_out),
+      .X(inv_in), .M(P), .R(inv_out), .real_inverse(1'b1),
       .req_valid(inv_req_valid),
       .req_ready(inv_req_ready),
       .req_busy(inv_req_busy),
@@ -178,10 +181,12 @@ module point_add(input clk,
 	 mul_in_1 = r2;
 	 mul_in_2 = r3;
       end
-      else if (state == S_INV) begin
+`ifdef I255
+       else if (state == S_INV) begin
 	 mul_in_1 = i2n;
 	 mul_in_2 = ri;
       end
+`endif
       else if (state == S_NRM_X) begin
 	 mul_in_1 = x3;
 	 mul_in_2 = ri;
@@ -205,7 +210,6 @@ module point_add(input clk,
 	 //i2n <= `I255;
 	 mul_res_ready <= 0;
 	 mul_req_valid <= 0;
-	 m_state <= M_INIT;
 	 inv_res_ready <= 0;
 	 inv_req_valid <= 0;
 	 m_state <= M_INIT;
@@ -448,11 +452,16 @@ module point_add(input clk,
 	       ri <= inv_out;
 	       inv_res_ready <= 1;
 	       m_state <= M_INIT;
+`ifdef I255
 	       state <= S_INV;
+`else
+	       state <= S_NRM_X;
+`endif
 	    end
 	 end
       end // if (state == S_INV_M)
-      else if (state == S_INV) begin
+`ifdef I255
+       else if (state == S_INV) begin
 	 if (m_state == M_INIT) begin
 	    mul_res_ready <= 0;
 	    mul_req_valid <= 1;
@@ -470,6 +479,7 @@ module point_add(input clk,
 	    end
 	 end
       end
+`endif
       else if (state == S_NRM_X) begin
 	 if (m_state == M_INIT) begin
 	    mul_res_ready <= 0;
