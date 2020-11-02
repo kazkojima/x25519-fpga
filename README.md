@@ -8,9 +8,9 @@ This is my trial of a verilog implementation of some operations on curve25519. S
 
 As an application of these operations, the scalar multiplication of the base point on curve25519 is implemented. It can be used to generate ed25519 keypairs.
 
-The target FPGA is ECP5-85G and yosys/nextpnr-ecp5 open software developing system is assumed. All operations are tested successfully on the real chip with 50Mhz clock. Testbench result of the keypair generation is checked and successful, though it's tested on the chip only with 12Mhz clock ATM.
+The target FPGA is ECP5-85G and yosys/nextpnr-ecp5 open software developing system is assumed. All operations are tested successfully on the real chip with 50Mhz clock.
 
-Unfortunately the routing for the ed25519 keypair circuit takes several days on my PC, ATM. Ugh.
+The routing for the ed25519 keypair circuit takes several hours on my PC, ATM.
 
 #### I'm new to FPGA, so I could miss something basic. Any comments and patches/pull-requests are highly welcome!
 
@@ -20,16 +20,18 @@ There are almost no countermeasure implemented against well-known attacks. See t
 
 ## Performance
 
-Testbench shows ~59700 cycles are needed to complete a scalar multiplication.
+Testbench shows ~59860 cycles are needed to complete a scalar multiplication.
 
 ## Device utilisation
 
 ```
-Info: 	       TRELLIS_SLICE: 21409/41820    51%
+Info: 	       TRELLIS_SLICE: 18480/41820    44%
 Info: 	          TRELLIS_IO:    11/  365     3%
-Info: 	                DCCA:     1/   56     1%
+Info: 	                DCCA:     2/   56     3%
 Info: 	              DP16KD:    45/  208    21%
 Info: 	          MULT18X18D:     0/  156     0%
+Info: 	              ALU54B:     0/   78     0%
+Info: 	             EHXPLLL:     1/    4    25%
 ```
 
 ## x25519.jl
