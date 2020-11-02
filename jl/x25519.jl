@@ -205,6 +205,9 @@ end
 # Montgomery modular inverse.
 # Input X in 1:M-1 and M
 # Output Lrs in 1:M-1 where Lrs = Xinv 2^n mod M
+#  if real_inverse is false, then n = bitsize(M) else n = 0
+#  i.e. when real_inverse is true, return the real inverse instead of
+#  the almost inverse.
 function inv_montgomery(X, M; real_inverse=false)
     # Phase1
     k = -bitsize(M)
