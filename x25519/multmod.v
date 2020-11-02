@@ -44,8 +44,8 @@ module multmod
    reg [2:0] lut1idx;
    reg [259:0] ms_in, mc_in;
    wire [259:0] ms, mc;
-   reg [259:0] s, c, n, s1, c1, s2, c2, s3, c3, sn, cn;
-   reg [15:0] l;
+   reg [259:0] s, c, s1, c1, s2, c2, s3, c3, sn, cn;
+   reg [15:0] l, n;
    reg [255:0] x;
    reg [255:0] z, t;
    wire [257:0] sy7, cy7;
@@ -119,8 +119,8 @@ module multmod
 	 c2 = { ((s1 & ms) | (s1 & c1) | (ms & c1)), 1'b0 };
          s3 = (s2 ^ mc) ^ c2;
          c3 = { ((s2 & mc) | (s2 & c2) | (mc & c2)), 1'b0 };
-         sn = (s3 ^ n) ^ c3;
-         cn = { ((s3 & n) | (s3 & c3) | (n & c3)), 1'b0 };
+         sn = { s3[259:16], (s3[15:0] ^ n) } ^ c3;
+         cn = { ((s3[15:0] & n) | (s3 & c3) | (n & c3[15:0])), 1'b0 };
       end // if (state == S_LOOP)
       else if (state == S_REDUCE_STEP4) begin
 	 t = z + 19;
