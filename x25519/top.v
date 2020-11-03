@@ -43,10 +43,12 @@ endmodule
 module top(input wire clk,
            input wire rstn,
            output tp0,
+           output tp1,
+           output tp2,
            output [7:0] led);
 
    reg [7:0] state;
-   reg [5:0] count;
+   reg [7:0] count;
    wire rst;
    wire [254:0] x3_out, y3_out, t3_out, z3_out;
    wire req_ready, req_busy, res_valid;
@@ -104,12 +106,12 @@ module top(input wire clk,
 		     .res_valid(res_valid),
 		     .res_ready(res_ready));
 
-   //assign led[7] = ~res_valid;
-   //assign led[6] = ~req_busy;
    assign led[7:0] = ~count;
-   assign tp0 = ~&x3_out;
+   assign tp0 = &x3_out;
+   assign tp1 = res_valid;
+   assign tp2 = req_busy;
 
-   always @(posedge clk) begin
+   always @(posedge refclk) begin
       if (rstn == 0) begin
 	 rst <= 1;
 	 res_ready <= 0;
