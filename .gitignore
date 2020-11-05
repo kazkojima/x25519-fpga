@@ -5,6 +5,8 @@
 *.bin
 *.svf
 *.txtcfg
+*.vvp
+*.vcd
 *.swp
 .*.swp
 *~
