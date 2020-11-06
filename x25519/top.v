@@ -49,7 +49,7 @@ module top(input wire clk,
 
    reg [7:0] state;
    reg [7:0] count;
-   wire rst;
+   reg rst;
    wire [254:0] x3_out, y3_out, t3_out, z3_out;
    wire req_ready, req_busy, res_valid;
    reg res_ready;
