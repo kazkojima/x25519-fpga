@@ -4,7 +4,7 @@
 //  Implementation of ED25519 and CURVE25519 Point Multiplication.
 //  Information. 10. 285. 10.3390/info10090285.
 
-`include "./csa.v"
+//`include "./csa.v"
 
 `define P25519 255'd57896044618658097711785492504343953926634992332820282019728792003956564819949
 
