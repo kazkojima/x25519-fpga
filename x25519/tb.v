@@ -2,14 +2,6 @@
 
 `define P25519 255'd57896044618658097711785492504343953926634992332820282019728792003956564819949
 
-`include "./csa.v"
-`include "./addmod.v"
-`include "./submod.v"
-`include "./multmod.v"
-`include "./inv_montgomery.v"
-`include "./point_add.v"
-`include "./scalarmultB.v"
-
 module testbench;
    reg clk;
 
