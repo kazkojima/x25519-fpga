@@ -22,24 +22,22 @@ module inv_montgomery #(parameter N = 255)
 
    // Phase1
    reg [3:0] state;
-   reg [9:0] k;
-   wire [9:0] n_ph2;
+   reg [10:0] k;
+   wire [10:0] n_ph2;
    reg [(N+2)-1:0] Luv, Ruv, Lrs, Rrs;
-   reg [(N+2)-1:0] hLuv, dLuv, hRrs, dRrs, dLrs, addLuv, subLuv, subLrs, hLrs, addLrs;
-   reg SLuv, SRuv, nSLuv, nSLrs;
+   reg [(N+2)-1:0] hLuv, dLuv, hRrs, dRrs, dLrs, addLuv, subLuv;
+   wire [(N+2)-1:0] subLrs, hLrs, addLrs;
+   reg SLuv, SRuv, nSLuv;
+   wire nSLrs;
 
    assign n_ph2 = (real_inverse) ? 0 : N;
 
-   always @* begin
-      if (state == S_PHASE1_END) begin
-	 subLrs = Lrs - Rrs;
-	 nSLrs = subLrs[(N+2)-1:(N+2)-1];
-      end
-      else if (state == S_LOOP2) begin
-	 hLrs = { Lrs[(N+2)-1:(N+2)-1], Lrs[(N+2)-1:1] };
-	 addLrs = Lrs + Rrs;
-      end
-   end // always @ *
+   // S_PHASE1_END state
+   assign subLrs = Lrs - Rrs;
+   assign nSLrs = subLrs[(N+2)-1];
+   // S_LOOP2 state
+   assign hLrs = { Lrs[(N+2)-1:(N+2)-1], Lrs[(N+2)-1:1] };
+   assign addLrs = Lrs + Rrs;
 
    localparam S_IDLE = 1;
    localparam S_READY = 2;
