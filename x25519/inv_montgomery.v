@@ -91,7 +91,7 @@ module inv_montgomery #(parameter N = 255)
 	 state <= S_LOOP1_STEP2;
       end
       else if (state == S_LOOP1_STEP2) begin
-	 nSLuv = (SLuv ^ SRuv) ? addLuv[(N+2)-1:(N+2)-1] : subLuv[(N+2)-1:(N+2)-1];
+	 nSLuv <= (SLuv ^ SRuv) ? addLuv[(N+2)-1:(N+2)-1] : subLuv[(N+2)-1:(N+2)-1];
 	 state <= S_LOOP1_UPDATE;
       end
       else if (state == S_LOOP1_UPDATE) begin
