@@ -88,6 +88,7 @@ module multmod
 	29: lut2 = 16'd4408;
 	30: lut2 = 16'd4560;
 	31: lut2 = 16'd4712;
+	default: lut2 = 0;
       endcase // case (addr)
    endfunction
 
