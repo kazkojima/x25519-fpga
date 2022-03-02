@@ -30,11 +30,11 @@ module point_add(input clk,
 		 output reg res_valid,
 		 input res_ready);
 
-   reg [254:0] add_in_1, add_in_2;
+   wire [254:0] add_in_1, add_in_2;
    wire [254:0] add_out;
-   reg [254:0] sub_in_1, sub_in_2;
+   wire [254:0] sub_in_1, sub_in_2;
    wire [254:0] sub_out;
-   reg [254:0] mul_in_1, mul_in_2;
+   wire [254:0] mul_in_1, mul_in_2;
    wire [254:0] mul_out;
    wire mul_req_ready;
    wire mul_req_busy;
@@ -109,98 +109,96 @@ module point_add(input clk,
    localparam M_INIT = 1;
    localparam M_WAIT = 2;
 
-   always @* begin
-      if (state == S_SUB_1) begin
-	 sub_in_1 = y1;
-	 sub_in_2 = x1;
-      end
-      else if (state == S_SUB_2) begin
-	 sub_in_1 = y2;
-	 sub_in_2 = x2;
-      end
-      else if (state == S_ADD_1) begin
-	 add_in_1 = y1;
-	 add_in_2 = x1;
-      end
-      else if (state == S_ADD_2) begin
-	 add_in_1 = y2;
-	 add_in_2 = x2;
-      end
-      else if (state == S_MUL_1) begin
-	 mul_in_1 = r1;
-	 mul_in_2 = r2;
-      end
-      else if (state == S_MUL_2) begin
-	 mul_in_1 = r3;
-	 mul_in_2 = r4;
-      end
-      else if (state == S_MUL_3) begin
-	 mul_in_1 = t1;
-	 mul_in_2 = t2;
-      end
-      else if (state == S_MUL_4) begin
-	 mul_in_1 = z1;
-	 mul_in_2 = z2;
-      end
-      else if (state == S_MUL_k) begin
-	 mul_in_1 = k;
-	 mul_in_2 = r7;
-      end
-      else if (state == S_ADD_d) begin
-	 add_in_1 = r8;
-	 add_in_2 = r8;
-      end
-      else if (state == S_SUB_3) begin
-	 sub_in_1 = r6;
-	 sub_in_2 = r5;
-      end
-      else if (state == S_SUB_4) begin
-	 sub_in_1 = r8;
-	 sub_in_2 = r7;
-      end
-      else if (state == S_ADD_3) begin
-	 add_in_1 = r8;
-	 add_in_2 = r7;
-      end
-      else if (state == S_ADD_4) begin
-	 add_in_1 = r6;
-	 add_in_2 = r5;
-      end
-      else if (state == S_MUL_5) begin
-	 mul_in_1 = r1;
-	 mul_in_2 = r2;
-      end
-      else if (state == S_MUL_6) begin
-	 mul_in_1 = r3;
-	 mul_in_2 = r4;
-      end
-      else if (state == S_MUL_7) begin
-	 mul_in_1 = r1;
-	 mul_in_2 = r4;
-      end
-      else if (state == S_MUL_8) begin
-	 mul_in_1 = r2;
-	 mul_in_2 = r3;
-      end
+   function [254:0] sub_in_1_(input [4:0] st);
+     case(st)
+       S_SUB_1: sub_in_1_ = y1;
+       S_SUB_2: sub_in_1_ = y2;
+       S_SUB_3: sub_in_1_ = r6;
+       S_SUB_4: sub_in_1_ = r8;
+       default: sub_in_1_ = 0;
+     endcase // case (state)
+   endfunction
+
+   function [254:0] sub_in_2_(input [4:0] st);
+     case(st)
+       S_SUB_1: sub_in_2_ = x1;
+       S_SUB_2: sub_in_2_ = x2;
+       S_SUB_3: sub_in_2_ = r5;
+       S_SUB_4: sub_in_2_ = r7;
+       default: sub_in_2_ = 0;
+     endcase // case (st)
+   endfunction
+
+   function [254:0] add_in_1_(input [4:0] st);
+     case(st)
+       S_ADD_1: add_in_1_ = y1;
+       S_ADD_2: add_in_1_ = y2;
+       S_ADD_3: add_in_1_ = r8;
+       S_ADD_4: add_in_1_ = r6;
+       S_ADD_d: add_in_1_ = r8;
+       default: add_in_1_ = 0;
+     endcase // case (st)
+   endfunction
+
+   function [254:0] add_in_2_(input [4:0] st);
+     case(st)
+       S_ADD_1: add_in_2_ = x1;
+       S_ADD_2: add_in_2_ = x2;
+       S_ADD_3: add_in_2_ = r7;
+       S_ADD_4: add_in_2_ = r5;
+       S_ADD_d: add_in_2_ = r8;
+       default: add_in_2_ = 0;
+     endcase // case (st)
+   endfunction
+
+   function [254:0] mul_in_1_(input [4:0] st);
+     case(st)
+       S_MUL_1: mul_in_1_ = r1;
+       S_MUL_2: mul_in_1_ = r3;
+       S_MUL_3: mul_in_1_ = t1;
+       S_MUL_4: mul_in_1_ = z1;
+       S_MUL_k: mul_in_1_ = k;
+       S_MUL_5: mul_in_1_ = r1;
+       S_MUL_6: mul_in_1_ = r3;
+       S_MUL_7: mul_in_1_ = r1;
+       S_MUL_8: mul_in_1_ = r2;
 `ifdef I255
-       else if (state == S_INV) begin
-	 mul_in_1 = i2n;
-	 mul_in_2 = ri;
-      end
+       S_INV:   mul_in_1_ = i2n;
 `endif
-      else if (state == S_NRM_X) begin
-	 mul_in_1 = x3;
-	 mul_in_2 = ri;
-      end
-      else if (state == S_NRM_Y) begin
-	 mul_in_1 = y3;
-	 mul_in_2 = ri;
-      end
-      else if (state == S_NRM_T) begin
-	 mul_in_1 = x3;
-	 mul_in_2 = y3;
-      end
-   end
+       S_NRM_X: mul_in_1_ = x3;
+       S_NRM_Y: mul_in_1_ = y3;
+       S_NRM_T: mul_in_1_ = x3;
+       default: mul_in_1_ = 0;
+     endcase // case (st)
+   endfunction
+
+   function [254:0] mul_in_2_(input [4:0] st);
+     case(st)
+       S_MUL_1: mul_in_2_ = r2;
+       S_MUL_2: mul_in_2_ = r4;
+       S_MUL_3: mul_in_2_ = t2;
+       S_MUL_4: mul_in_2_ = z2;
+       S_MUL_k: mul_in_2_ = r7;
+       S_MUL_5: mul_in_2_ = r2;
+       S_MUL_6: mul_in_2_ = r4;
+       S_MUL_7: mul_in_2_ = r4;
+       S_MUL_8: mul_in_2_ = r3;
+`ifdef I255
+       S_INV:   mul_in_2_ = ri;
+`endif
+       S_NRM_X: mul_in_2_ = ri;
+       S_NRM_Y: mul_in_2_ = ri;
+       S_NRM_T: mul_in_2_ = y3;
+       default: mul_in_2_ = 0;
+     endcase // case (st)
+   endfunction
+
+   assign add_in_1 = add_in_1_(state);
+   assign add_in_2 = add_in_2_(state);
+   assign sub_in_1 = sub_in_1_(state);
+   assign sub_in_2 = sub_in_2_(state);
+   assign mul_in_1 = mul_in_1_(state);
+   assign mul_in_2 = mul_in_2_(state);
 
    assign inv_in = z3;
 
