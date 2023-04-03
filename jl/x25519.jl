@@ -282,3 +282,51 @@ function invmod_25519_M(x)
     # return multmod_25519(iM, i2n)
     return iM
 end
+
+# Generating precomputed scalar mutliple tables.
+
+BasePoint_25519=(BigInt(0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a), BigInt(0x6666666666666666666666666666666666666666666666666666666666666658))
+
+function double_25519(x)
+    u, v = (x[1], x[2])
+    t = multmod_25519(u, v)
+    d = point_add(u, v, t, 1, u, v, t, 1, affine=true)
+    return d[1], d[2]
+end
+
+function gen_precomp_25519()
+    plist=[]
+    ppow=BasePoint_25519
+    fx=open("../x25519/x_precomp_32k.dat", "w")
+    fy=open("../x25519/y_precomp_32k.dat", "w")
+    ft=open("../x25519/t_precomp_32k.dat", "w")
+    for j in 1:64
+        println("round $(j)")
+        u, v = ppow
+        s = multmod_25519(u, v)
+        x, y, t = (u, v, s)
+        for i in 1:16
+            if (i==1)
+                write(fx, string(0,base=16,pad=64))
+                write(fy, string(1,base=16,pad=64))
+                write(ft, string(0,base=16,pad=64))
+            elseif (i==2)
+                write(fx, string(u,base=16,pad=64))
+                write(fy, string(v,base=16,pad=64))
+                write(ft, string(s,base=16,pad=64))
+            else
+                x, y, t, z = point_add(x, y, t, 1, u, v, s, 1, affine=true)
+                write(fx, string(x,base=16,pad=64))
+                write(fy, string(y,base=16,pad=64))
+                write(ft, string(t,base=16,pad=64))
+            end
+            write(fx, "\n")
+            write(fy, "\n")
+            write(ft, "\n")
+        end
+        ppow = double_25519(double_25519(double_25519(double_25519(ppow))))
+    end
+    close(fx)
+    close(fy)
+    close(ft)
+end
